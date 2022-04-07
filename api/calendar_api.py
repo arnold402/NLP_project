@@ -26,18 +26,18 @@ def load_calendar():
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists('api/token.json'):
+        creds = Credentials.from_authorized_user_file('api/token.json', SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'client_secret.json', SCOPES)
+                'api/client_secret.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('token.json', 'w') as token:
+        with open('api/token.json', 'w') as token:
             token.write(creds.to_json())
 
     try:
@@ -68,10 +68,19 @@ def next_event(service, taskdate):
     except:
         response = "You dont have meetings left today"   
 
+
+def action_time(service, taskdate):
+    return datetime.datetime.now().time().strftime('%H:%M')
+
+def repeat_question(service, taskdate):
+    return "sorry can you please repeat your question"
+
 # now let have a general function query that should pick which querry we run
 # Queries is a dictionary with all the relevant functions for each task in our questions-task.csv file
 Queries = {}
-Queries["Get next event"] = next_event 
+Queries["Get next event"] = next_event
+Queries["Get time"] = action_time
+Queries["Repeat"]  = repeat_question
 
 
 def run_query(service, query):

@@ -88,8 +88,13 @@ class DistanceModel(object):
               - a date time, a string or none if it can't read it
         """
 
-        one_embedding = self.model.endode(sentence)
+        one_embedding = self.model.encode(sentence)
         distances = cosine_similarity([one_embedding], self.sentence_embeddings)
+
+        max_dist = np.max(distances)
+
+        if max_dist < 0.5:
+            return "Repeat", None
 
         task = self.tasks[np.argmax(distances)]
 
