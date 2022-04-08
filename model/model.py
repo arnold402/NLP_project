@@ -7,7 +7,11 @@ from sentence_transformers import SentenceTransformer
 
 from sklearn.metrics.pairwise import cosine_similarity
 
-from datetime import *; from dateutil.relativedelta import *
+from datetime import *
+from dateutil.relativedelta import *
+
+import spacy
+
 
 mycsvfile = "model/questions-task.csv"
 
@@ -53,7 +57,7 @@ def get_date(string, fuzzy=False):
         else:
             return None 
 
-class DistanceModel(object):
+class SpacyModel(object):
     """Implementation of simple model for computing the similarity between
        sentences using the cosine similarity between the embedded vectors
     """
@@ -70,8 +74,9 @@ class DistanceModel(object):
         sentences = df["Questions"].to_list()
         self.tasks = df["Tasks"].to_list()
 
-        self.model = SentenceTransformer('bert-base-nli-mean-tokens')
-        self.sentence_embeddings = self.model.encode(sentences)
+        # run: 'python -m spacy download en_core_web_md' first.
+        self.nlp_model = spacy.load("en_core_web_md")
+        self.sentence_tokens = self.nlp_model(sentences)
 
 
     def predict(self, sentence):
@@ -88,15 +93,18 @@ class DistanceModel(object):
               - a date time, a string or none if it can't read it
         """
 
-        one_embedding = self.model.encode(sentence)
-        distances = cosine_similarity([one_embedding], self.sentence_embeddings)
+        token = self.nlp_model(sentence)
+        similarity_values = []
+        for q in self.sentence_tokens:
+            score = q.similarity(similarity_values)
+            similarity_values.append(score)
 
-        max_dist = np.max(distances)
+        max_similarity = np.max(similarity_values)
 
-        if max_dist < 0.5:
+        if max_similarity < 0.5:
             return "Repeat", None
 
-        task = self.tasks[np.argmax(distances)]
+        task = self.tasks[np.argmax(similarity_values)]
 
         task_date = get_date(sentence)
         
