@@ -56,7 +56,7 @@ class ChatBot():
             response = "You dont have meetings left today"   
 
 
-nlp = transformers.pipeline("conversational", model="microsoft/DialoGPT-medium")
+#nlp = transformers.pipeline("conversational", model="microsoft/DialoGPT-medium")
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
 ##############
@@ -87,11 +87,13 @@ def getresponse():
     elif "next" in assistant.text:
         res = assistant.next_event()
 
-    ## conversation
-    else:   
-        chat = nlp(transformers.Conversation(assistant.text), pad_token_id=50256)
-        res = str(chat)
-        res = res[res.find("bot >> ")+6:].strip()
+    else:
+        res = "Please rephrase!"
+    # ## conversation
+    # else:   
+    #     chat = nlp(transformers.Conversation(assistant.text), pad_token_id=50256)
+    #     res = str(chat)
+    #     res = res[res.find("bot >> ")+6:].strip()
 
     return jsonify({"response": res})
 
