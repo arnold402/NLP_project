@@ -10,7 +10,6 @@ sentence-transformers
 pandas
 SpeechRecognition
 gTTS
-PyAudio
 fasttext
 flask
 gunicorn
