@@ -65,7 +65,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
 @app.route("/getresponse", methods=["GET","POST"])
 def getresponse():
-    input_text = "what is the time"
+    input_text = dict(request.form)['query']
     assistant = ChatBot(name="alina", text=input_text)
 
     ## wake up
