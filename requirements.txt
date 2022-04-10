@@ -12,3 +12,5 @@ SpeechRecognition
 gTTS
 PyAudio
 fasttext
+flask
+gunicorn
