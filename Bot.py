@@ -91,9 +91,11 @@ if __name__ == "__main__":
             if nlp.lang(assistant.text) == "en":
                 res = "Hello I am Alina the assistant, what can I do for you?"
                 assistant.set_lang("en-US")
+                calendar_api.LANGUAGE = "en"
             else:
                 res = "Bonjour, je suis Alina l'assistante, que puis-je faire pour vous?"
                 assistant.set_lang("fr-FR")
+                calendar_api.LANGUAGE = "fr"
 
         ## respond politely
         elif any(i in assistant.text.lower() for i in ["thank","thanks"]):

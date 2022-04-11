@@ -22,6 +22,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 calendar_id = 'primary' # ulrich@dsi-program.com
 now = datetime.datetime.utcnow().isoformat() + 'Z'
 end_DSI = '2022-05-31T23:59:0.0Z'
+LANGUAGE = "en"
 
 def load_calendar():
     """
@@ -70,10 +71,14 @@ def next_event(service = load_calendar(), taskdate = now):
         response = [(event['summary'], 
                     event['start'].get('dateTime', event['start'].get('date')), 
                     event['end'].get('dateTime', event['end'].get('date'))) for event in events][0]
-        response = "Your next meeting is " + response[0] + ". It starts at " + dt.strftime(dtparse(response[1]), format=tf)            
+        
+        if LANGUAGE == "en":
+            response = "Your next meeting is " + response[0] + ". It starts at " + dt.strftime(dtparse(response[1]), format=tf)
+        else:
+            response = "Votre prochaine reunion est " + response[0] + ". Elle debute a " + dt.strftime(dtparse(response[1]), format=tf)           
         
     except:
-        response = "You dont have meetings left today"   
+        response = "You dont have meetings left today"  if LANGUAGE == "en" else "Vous n'avez plus de reunion prevu pour aujourd'hui" 
     return response
 
 def action_time(service = load_calendar(), taskdate= now):
@@ -101,7 +106,10 @@ def tomorrow_meeting(service = load_calendar()):
               event['start'].get('dateTime', event['start'].get('date')), 
               event['end'].get('dateTime', event['end'].get('date'))) for event in events]
 
-  response = "Your tomorow's events are as follows: ", [(response[0][0],'at', dt.strftime(dtparse(response[0][1]), format=tf)) for item in response]
+  if LANGUAGE == "en":
+    response = "Your tomorow's events are as follows: ", [(response[0][0],'at', dt.strftime(dtparse(response[0][1]), format=tf)) for item in response]
+  else:
+    response = "Vos reunions de demain sont les suivantes: ", [(response[0][0],'a parti de', dt.strftime(dtparse(response[0][1]), format=tf)) for item in response]
   return response
 
 def get_all_event(service = load_calendar()) :
@@ -145,7 +153,18 @@ def readytoread(eventdf):
       s = s+ (row.summary + " starting at " +  row.start + " and ending at "+ row.end)
       
   s =s+ " You have " + str(i)  +" such event, Thank you for asking."
-  return(s)    
+  return(s) 
+
+def readytoread_fr(eventdf):
+  s = 'Votre liste de reunions est la suivante : '
+  i = 0
+  for row in eventdf.itertuples():
+      i += 1
+      s = s+ ' Reunion numero ' + str(i) +":"
+      s = s+ (row.summary + " de " +  row.start + " a "+ row.end)
+      
+  s =s+ " Vous avez " + str(i)  +" de ce genre d'evenements."
+  return(s)   
 
 def list_event_on(service = load_calendar(),topic= 'NLP') :
   
@@ -154,13 +173,13 @@ def list_event_on(service = load_calendar(),topic= 'NLP') :
   try :  
     idx = [i for i in range(len(all_events['summary'])) if is_on(all_events['summary'][i], topic)]
     if len(idx)==0 :
-      return('There is no such event')
+      return('There is no such event' if LANGUAGE=="en" else "Vous n'avez aucun evenements de ce genre")
       
     on_topic = all_events.loc[idx, ['summary', 'start','end']]
     on_topic["start"] =  (on_topic["start"]).apply(format) 
     on_topic["end"] = (on_topic["end"]).apply(format) 
-    return(readytoread(on_topic))
-  except : repeat_question
+    return(readytoread(on_topic) if LANGUAGE=="en" else readytoread_fr(on_topic))
+  except : repeat_question if LANGUAGE == "en" else repeat_question_fr
 
 
 def is_ons(event, keywords):
@@ -177,14 +196,14 @@ def list_event_ons(service = load_calendar(),keywords = ['Lecture','Bruce'], sou
     try :  
       idx = [i for i in range(len(source_data['summary'])) if is_ons(source_data['summary'][i], keywords)]
       if len(idx)==0 :
-        return('Nope! We are not having such event')
+        return('Nope! We are not having such event' if LANGUAGE=="en" else "Nous n'avons pas ce type d'evenements")
         
       on_topic = source_data.loc[idx,features]
       on_topic["start"] =  (on_topic["start"]).apply(format) 
       on_topic["end"] = (on_topic["end"]).apply(format) 
 
-      return(readytoread(on_topic))
-    except : repeat_question 
+      return(readytoread(on_topic) if LANGUAGE=="en" else readytoread_fr(on_topic))
+    except : repeat_question if LANGUAGE == "en" else repeat_question_fr
 
 def get_week(date):
   """Return the full week (Sunday first) of the week containing the given date.
@@ -233,7 +252,7 @@ def give_start_end(timeframe):
         month_end = str(currentYear) +'-'+(month)+'-' +str(number_day_in_month[currentMonth +i -1] )+ 'T23:59:0.0Z'
         return([month_start, month_end ])
   except :
-    return('Can you give a valid timeframe')   
+    return('Can you give a valid timeframe' if LANGUAGE=="en" else "Donne une zones horraire valide")   
 
 def now() : 
   return datetime.datetime.utcnow().isoformat() + 'Z'
@@ -249,13 +268,13 @@ def querries( service =  load_calendar(), keywords= ['Stand-up'], timeframe = [n
       maxResults=maxResults, singleEvents=True,
       orderBy='startTime').execute()
     # changed
-    if events_result['items']==[]: return 'No such event'
+    if events_result['items']==[]: return 'No such event' if LANGUAGE == "en" else "Aucun evenement"
     ##
 
     events = pd.DataFrame(events_result['items'])
     
     return( list_event_ons(service,keywords, source_data = events, features=features ))
-  except : (repeat_question)
+  except : (repeat_question if LANGUAGE == "en" else repeat_question_fr)
 
 
 ## Since all element in the Queries dictionary need to call on function each, we provide the following function based on the question
