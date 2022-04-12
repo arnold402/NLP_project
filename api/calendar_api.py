@@ -90,7 +90,7 @@ def repeat_question(service = load_calendar(), taskdate = now):
 def repeat_question_fr(service = load_calendar(), taskdate = now):
     return "s'il vous plait pouvez-vous repeter votre question"
 
-def tomorrow_meeting(service = load_calendar()):
+def tomorrow_meeting(service = load_calendar(), taskdate = now):
   tomorrow_start = (datetime.date.today() + datetime.timedelta(days=1)).isoformat() + 'T00:00:0.0Z'
   tomorrow_end = (datetime.date.today() + datetime.timedelta(days=1)).isoformat() + 'T23:59:0.0Z'
 
@@ -107,12 +107,12 @@ def tomorrow_meeting(service = load_calendar()):
               event['end'].get('dateTime', event['end'].get('date'))) for event in events]
 
   if LANGUAGE == "en":
-    response = "Your tomorow's events are as follows: ", [(response[0][0],'at', dt.strftime(dtparse(response[0][1]), format=tf)) for item in response]
+    response = "Your tomorow's events are as follows: "+str([(response[0][0],'at', dt.strftime(dtparse(response[0][1]), format=tf)) for item in response])
   else:
-    response = "Vos reunions de demain sont les suivantes: ", [(response[0][0],'a parti de', dt.strftime(dtparse(response[0][1]), format=tf)) for item in response]
+    response = "Vos reunions de demain sont les suivantes: "+str([(response[0][0],'a parti de', dt.strftime(dtparse(response[0][1]), format=tf)) for item in response])
   return response
 
-def get_all_event(service = load_calendar()) :
+def get_all_event(service = load_calendar(), taskdate=now) :
   """ taking all event in a panda dataframe to access it easily with its rows and column"""
   source_time_zone = pytz.timezone('Africa/Johannesburg')
   target_time_zone = pytz.timezone('America/New_York')

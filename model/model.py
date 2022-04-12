@@ -105,7 +105,7 @@ class DistanceModel(object):
 
         lang = self.lang(sentence)
 
-        thresh_hold = 0.5 #if lang == "en" else 0.2
+        thresh_hold = 0.2 #if lang == "en" else 0.2
 
         if max_dist < thresh_hold:
             if lang == "en":

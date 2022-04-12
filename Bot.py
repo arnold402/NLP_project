@@ -50,11 +50,11 @@ class ChatBot():
         os.remove("res.mp3")
 
     def wake_up(self, text):
-        wakeup_hey = "hey %s"%self.name
-        wakeup_hi = "hi %s"%self.name
-        wakeup_bj = "bonjour %s"%self.name 
+        wakeup_hey = "hello" #%self.name
+        # wakeup_hi = "hello %s"%self.name
+        wakeup_bj = "bonjour" #%self.name 
 
-        if wakeup_hey in text.lower() or wakeup_hi in text.lower() or wakeup_bj in text.lower():
+        if wakeup_hey in text.split(" ")[0].lower() or wakeup_bj in text.split(" ")[0].lower():
             return True
         else:
             return False
@@ -83,19 +83,25 @@ if __name__ == "__main__":
     
     os.environ["TOKENIZERS_PARALLELISM"] = "true"
     
+    init_languague = True
+    
     while True:
         assistant.speech_to_text()
 
         ## wake up
         if assistant.wake_up(assistant.text) is True:
-            if nlp.lang(assistant.text) == "en":
+            if nlp.lang(assistant.text.split(" ")[0]) == "en":
                 res = "Hello I am Alina the assistant, what can I do for you?"
-                assistant.set_lang("en-US")
-                calendar_api.LANGUAGE = "en"
+                if init_languague: 
+                    assistant.set_lang("en-US")
+                    calendar_api.LANGUAGE = "en"
+                    init_languague = False
             else:
                 res = "Bonjour, je suis Alina l'assistante, que puis-je faire pour vous?"
-                assistant.set_lang("fr-FR")
-                calendar_api.LANGUAGE = "fr"
+                if init_languague:
+                    assistant.set_lang("fr-FR")
+                    calendar_api.LANGUAGE = "fr"
+                    init_languague = False
 
         ## respond politely
         elif any(i in assistant.text.lower() for i in ["thank","thanks"]):
@@ -117,6 +123,6 @@ if __name__ == "__main__":
             query = nlp.predict(assistant.text)
             res = calendar_api.run_query(service, query) 
 
-        lang = nlp.lang(res)
-        assistant.text_to_speech(res, lang)
+        # lang = nlp.lang(res)
+        assistant.text_to_speech(res)
             
